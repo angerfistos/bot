@@ -3,13 +3,6 @@ node_modules/
 .pnpm/
 *.log
 
-# Environnements & Configurations
-.env
-.env.local
-.env.development
-.env.production
-.env.test
-
 # Build
 /dist/
 /build/
@@ -20,9 +13,6 @@ node_modules/
 .nyc_output/
 coverage/
 
-# MongoDB
-/data/
-*.lock
 
 # Vite
 .vite/
