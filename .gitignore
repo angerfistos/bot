@@ -1,0 +1,39 @@
+# Node.js
+node_modules/
+.pnpm/
+*.log
+
+# Environnements & Configurations
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Build
+/dist/
+/build/
+
+# Cache & Logs
+.vscode/
+.DS_Store
+.nyc_output/
+coverage/
+
+# MongoDB
+/data/
+*.lock
+
+# Vite
+.vite/
+
+# Linter & Editor
+.eslintcache
+.idea/
+*.swp
+
+# Back & Front spécifiques
+back/node_modules/
+front/node_modules/
+back/pnpm-lock.yaml
+front/pnpm-lock.yaml
