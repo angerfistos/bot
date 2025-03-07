@@ -1,0 +1,72 @@
+.
+├── back
+│   ├── package-lock.json
+│   ├── package.json
+│   └── src
+│       ├── app.js
+│       ├── bot.js
+│       ├── config
+│       │   ├── database.js
+│       │   └── swagger.js
+│       ├── middleware
+│       │   └── auth.js
+│       ├── models
+│       │   └── user.model.js
+│       └── routes
+│           └── user.routes.js
+├── front
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── public
+│   │   ├── video
+│   │   │   ├── blacklogo.mp4
+│   │   │   └── whitelogo.mp4
+│   │   └── vite.svg
+│   ├── README.md
+│   ├── src
+│   │   ├── App.jsx
+│   │   ├── assets
+│   │   │   └── react.svg
+│   │   ├── components
+│   │   │   ├── buttons
+│   │   │   │   └── Button.jsx
+│   │   │   ├── layouts
+│   │   │   │   ├── Footer.jsx
+│   │   │   │   └── Header.jsx
+│   │   │   └── qrcode
+│   │   │       └── qrCode.jsx
+│   │   ├── hooks
+│   │   │   └── useFetch.js
+│   │   ├── layouts
+│   │   │   └── MainLayout.jsx
+│   │   ├── main.jsx
+│   │   ├── pages
+│   │   │   ├── about
+│   │   │   │   └── About.jsx
+│   │   │   ├── dashboard
+│   │   │   │   └── DashBoard.jsx
+│   │   │   ├── login
+│   │   │   │   └── Login.jsx
+│   │   │   ├── notfound
+│   │   │   │   └── NotFound.jsx
+│   │   │   ├── params
+│   │   │   │   └── Params.jsx
+│   │   │   ├── register
+│   │   │   │   └── Register.jsx
+│   │   │   └── userprofil
+│   │   │       └── UserProfil.jsx
+│   │   ├── services
+│   │   │   ├── ApiRequest.js
+│   │   │   └── auth.js
+│   │   └── styles
+│   │       └── tailwind.css
+│   ├── tailwind.config.js
+│   └── vite.config.js
+├── package-lock.json
+├── README.md
+└── structure.txt
+
+28 directories, 42 files

@@ -1,10 +1,11 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const userRoutes = require("./routes/user.routes");
-const botRoutes = require("./bot"); 
+const botRoutes = require("./bot");
+const messagingRoutes = require("./messaging");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpecs = require("./config/swagger");
-const cors = require("cors"); 
+const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,7 +22,6 @@ app.use(
   })
 );
 
-
 app.use(express.json());
 
 /* -------------------------------------------------------------------------- */
@@ -37,9 +37,16 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 /* -------------------------------------------------------------------------- */
 /*                         Définition des routes                              */
 /* -------------------------------------------------------------------------- */
-
 app.use("/api/users", userRoutes);
-app.get("/api/bot-status", botRoutes.getBotStatus); // 🔥 Utilise bot.js
+app.get("/api/bot-status", botRoutes.getBotStatus);
+
+app.get("/api/messaging-status", messagingRoutes.getMessagingStatus);
+app.post("/api/send-message", messagingRoutes.sendMessage);
+app.get("/api/messages", messagingRoutes.getMessages);
+app.get("/api/conversations", messagingRoutes.getChats);
+
+// ✅ Ajout de la route pour réinitialiser WhatsApp Web
+app.get("/api/reset-session", messagingRoutes.resetSession);
 
 /* -------------------------------------------------------------------------- */
 /*                          🚀 LANCEMENT DU SERVEUR                           */
