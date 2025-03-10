@@ -1,7 +1,7 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const userRoutes = require("./routes/user.routes");
-const messagingRoutes = require("./routes/messaging.routes");
+const messagingRoutes = require("./routes/messaging.routes"); // ✅ Routes API
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpecs = require("./config/swagger");
 const cors = require("cors");
@@ -44,10 +44,8 @@ app.use("/api/messaging", messagingRoutes);
 /* -------------------------------------------------------------------------- */
 /*                         Initialisation WebSocket                           */
 /* -------------------------------------------------------------------------- */
-const { setupWebSocket } = require("./messaging");
-
-// ✅ Initialise WebSocket
-setupWebSocket(server);
+const { setupWebSocket } = require("./messaging"); // ✅ Import depuis `messaging.js`
+setupWebSocket(server); // ✅ Initialise WebSocket
 
 /* -------------------------------------------------------------------------- */
 /*                          🚀 LANCEMENT DU SERVEUR                           */

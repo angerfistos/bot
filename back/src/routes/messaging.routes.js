@@ -1,23 +1,26 @@
 const express = require("express");
+const router = express.Router();
 const {
   getMessagingStatus,
   sendMessage,
   getMessages,
   getChats,
+  getContact, // ✅ Ajout ici
 } = require("../messaging");
 
-const router = express.Router();
-
-// 📌 Récupérer le statut de la connexion WhatsApp
+// 📌 Route pour récupérer le statut de connexion WhatsApp
 router.get("/status", getMessagingStatus);
 
-// 📌 Récupérer les messages d'une conversation spécifique
+// 📌 Route pour envoyer un message
+router.post("/send-message", sendMessage);
+
+// 📌 Route pour récupérer les messages d'une conversation spécifique
 router.get("/messages/:chatId", getMessages);
 
-// 📌 Récupérer la liste des conversations
-router.get("/conversations", getChats);
+// 📌 Route pour récupérer la liste des conversations
+router.get("/chats", getChats);
 
-// 📌 Envoyer un message via WhatsApp
-router.post("/send-message", sendMessage);
+// 📌 Route pour récupérer les infos d'un contact (💡 Nouvelle route)
+router.get("/contact/:chatId", getContact);
 
 module.exports = router;

@@ -4,6 +4,7 @@ import { fetchData, sendData } from "../../services/ApiRequest";
 const ChatWindow = ({ chatId, onBack }) => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+  const [contactName, setContactName] = useState(chatId); // Par défaut, affiche l'ID
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -13,7 +14,16 @@ const ChatWindow = ({ chatId, onBack }) => {
       }
     };
 
+    const fetchContactName = async () => {
+      const contactData = await fetchData(`messaging/contact/${chatId}`);
+      if (contactData?.name) {
+        setContactName(contactData.name);
+      }
+    };
+
     fetchMessages();
+    fetchContactName(); // Récupère le nom du contact
+
     const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
   }, [chatId]);
@@ -42,7 +52,7 @@ const ChatWindow = ({ chatId, onBack }) => {
     <div className="flex flex-col flex-1 p-4">
       <h2 className="flex items-center text-lg font-bold">
         <button onClick={onBack} className="p-2 mr-2 text-blue-500">🔙</button>
-        💬 {chatId}
+        💬 {contactName} {/* Affiche le nom du contact */}
       </h2>
 
       <div className="bg-gray-50 flex-1 p-2 mt-2 overflow-y-auto rounded-lg">

@@ -3,7 +3,7 @@ const qrcode = require("qrcode");
 const mongoose = require("mongoose");
 const { Server } = require("socket.io");
 
-let io; // Variable pour gérer le WebSocket
+let io; // Variable pour gérer WebSocket
 
 const MessageSchema = new mongoose.Schema({
   chatId: String,
@@ -17,7 +17,7 @@ const Message = mongoose.model("Message", MessageSchema);
 const messagingClient = new Client({
   authStrategy: new LocalAuth({ clientId: "messaging" }),
   puppeteer: {
-    headless: true, // Empêche l'ouverture du navigateur en prod
+    headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   },
 });
@@ -53,10 +53,9 @@ messagingClient.on("message", async (msg) => {
     chatId: msg.from,
     from: msg.from,
     body: msg.body,
-    timestamp: new Date().getTime(),
+    timestamp: Date.now(),
   });
 
-  // ✅ Envoi en temps réel au front via WebSocket
   if (io) {
     io.emit("newMessage", newMessage);
   }
@@ -66,17 +65,22 @@ messagingClient.on("message", async (msg) => {
 /*                        🛠️ Fonctions API REST                              */
 /* -------------------------------------------------------------------------- */
 
-// 📌 Récupérer le statut de la connexion WhatsApp
+// 📌 Récupérer le statut de connexion WhatsApp
 const getMessagingStatus = (req, res) => {
   console.log("📡 API appelée : /api/messaging/status");
   res.json({ status: messagingStatus, qrCode: messagingQrCode });
 };
 
-// 📌 Récupérer l'historique des messages
+// 📌 Récupérer l'historique des messages d'une conversation
 const getMessages = async (req, res) => {
   const { chatId } = req.params;
-  const messages = await Message.find({ chatId }).sort({ timestamp: 1 });
-  res.json(messages);
+  try {
+    const messages = await Message.find({ chatId }).sort({ timestamp: 1 });
+    res.json(messages);
+  } catch (error) {
+    console.error("❌ Erreur lors de la récupération des messages :", error);
+    res.status(500).json({ error: "Erreur serveur", details: error.message });
+  }
 };
 
 // 📌 Envoyer un message via WhatsApp
@@ -97,10 +101,9 @@ const sendMessage = async (req, res) => {
       chatId: to,
       from: "Moi",
       body: message,
-      timestamp: new Date().getTime(),
+      timestamp: Date.now(),
     });
 
-    // ✅ Envoi en temps réel au front via WebSocket
     if (io) {
       io.emit("newMessage", newMessage);
     }
@@ -112,64 +115,86 @@ const sendMessage = async (req, res) => {
   }
 };
 
+// 📌 Gérer la déconnexion de WhatsApp Web
 messagingClient.on("disconnected", async (reason) => {
   console.log("⚠️ WhatsApp Web s'est déconnecté ! Raison :", reason);
 
   messagingStatus = "En attente du QR Code";
   messagingQrCode = null;
 
-  // 🔄 Redémarre la connexion après 5 secondes
   setTimeout(() => {
     console.log("🔄 Redémarrage de WhatsApp Web...");
     messagingClient.initialize();
   }, 5000);
 });
 
-
 // 📌 Récupérer la liste des conversations WhatsApp
 const getChats = async (req, res) => {
   try {
-    console.log("📡 Vérification de l'état de connexion...");
-
-    if (
-      !messagingClient ||
-      !messagingClient.info ||
-      !messagingClient.info.wid
-    ) {
+    if (!messagingClient?.info?.wid) {
       console.warn("⚠️ WhatsApp Web n'est pas encore connecté !");
-      return res
-        .status(503)
-        .json({
-          error: "WhatsApp Web n'est pas encore prêt. Veuillez patienter...",
-        });
+      return res.status(503).json({ error: "WhatsApp Web non connecté" });
     }
 
-    console.log("✅ WhatsApp Web connecté, récupération des conversations...");
+    console.log("✅ Récupération des conversations...");
+
     const chats = await messagingClient.getChats();
 
-    if (!chats || chats.length === 0) {
+    if (!chats.length) {
       console.warn("⚠️ Aucune conversation trouvée.");
       return res.json([]);
     }
 
-    console.log("✅ Conversations récupérées :", chats.length);
+    console.log(`✅ ${chats.length} conversations récupérées`);
 
-    const formattedChats = chats.map((chat) => ({
-      id: chat.id._serialized,
-      name: chat.name || chat.id.user,
-      lastMessage: chat.lastMessage?.body || "Aucun message",
-      timestamp: chat.lastMessage?.timestamp || null,
-    }));
+    const formattedChats = await Promise.all(
+      chats.map(async (chat) => {
+        let contactName = chat.name || chat.id.user;
+
+        try {
+          const contact = await messagingClient.getContactById(
+            chat.id._serialized
+          );
+          if (contact) {
+            contactName = contact.pushname || contact.name || chat.id.user;
+          }
+        } catch (error) {
+          console.warn(
+            `⚠️ Impossible de récupérer les infos de ${chat.id._serialized}`
+          );
+        }
+
+        return {
+          id: chat.id._serialized,
+          name: contactName,
+          lastMessage: chat.lastMessage?.body || "Aucun message",
+          timestamp: chat.lastMessage?.timestamp || null,
+        };
+      })
+    );
 
     res.json(formattedChats);
   } catch (error) {
-    console.error("❌ Erreur lors de la récupération des chats :", error);
-    res
-      .status(500)
-      .json({
-        error: "Erreur lors de la récupération des conversations",
-        details: error.message,
-      });
+    console.error("❌ Erreur récupération des chats :", error);
+    res.status(500).json({
+      error: "Erreur récupération des conversations",
+      details: error.message,
+    });
+  }
+};
+
+// 📌 Récupérer les infos d'un contact
+const getContact = async (req, res) => {
+  const { chatId } = req.params;
+
+  try {
+    const contact = await messagingClient.getContactById(chatId);
+    const contactName = contact?.pushname || contact?.name || chatId;
+
+    res.json({ id: chatId, name: contactName });
+  } catch (error) {
+    console.error(`❌ Erreur récupération du contact ${chatId} :`, error);
+    res.status(500).json({ error: "Impossible de récupérer le contact" });
   }
 };
 
@@ -177,20 +202,23 @@ const getChats = async (req, res) => {
 /*                         🔄 Initialisation WebSocket                        */
 /* -------------------------------------------------------------------------- */
 const setupWebSocket = (server) => {
-  io = new Server(server, {
-    cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
-      methods: ["GET", "POST"],
-    },
-  });
-
-  io.on("connection", (socket) => {
-    console.log("⚡ Un utilisateur s'est connecté au WebSocket");
-
-    socket.on("disconnect", () => {
-      console.log("❌ Un utilisateur s'est déconnecté du WebSocket");
+  if (!io) {
+    // ✅ Évite de réinitialiser WebSocket
+    io = new Server(server, {
+      cors: {
+        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        methods: ["GET", "POST"],
+      },
     });
-  });
+
+    io.on("connection", (socket) => {
+      console.log("⚡ Un utilisateur s'est connecté au WebSocket");
+
+      socket.on("disconnect", () => {
+        console.log("❌ Un utilisateur s'est déconnecté du WebSocket");
+      });
+    });
+  }
 };
 
 /* -------------------------------------------------------------------------- */
@@ -204,5 +232,6 @@ module.exports = {
   sendMessage,
   getMessages,
   getChats,
-  setupWebSocket,
+  getContact, // ✅ Ajouté pour la récupération des contacts
+  setupWebSocket, // ✅ Ajouté pour le WebSocket
 };
