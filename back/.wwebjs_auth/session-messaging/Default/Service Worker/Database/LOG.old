@@ -1,3 +1,2 @@
-2025/03/07-21:19:24.695 f103 Reusing MANIFEST /Users/jeremieseynhaeve/Desktop/Bot-main/back/.wwebjs_auth/session-messaging/Default/Service Worker/Database/MANIFEST-000001
-2025/03/07-21:19:24.695 f103 Recovering log #3
-2025/03/07-21:19:24.695 f103 Reusing old log /Users/jeremieseynhaeve/Desktop/Bot-main/back/.wwebjs_auth/session-messaging/Default/Service Worker/Database/000003.log 
+2025/03/10-07:25:22.521 1201b Creating DB /Users/jeremieseynhaeve/Developer/bot-ALL/bot/back/.wwebjs_auth/session-messaging/Default/Service Worker/Database since it was missing.
+2025/03/10-07:25:22.534 1201b Reusing MANIFEST /Users/jeremieseynhaeve/Developer/bot-ALL/bot/back/.wwebjs_auth/session-messaging/Default/Service Worker/Database/MANIFEST-000001

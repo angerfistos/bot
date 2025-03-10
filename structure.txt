@@ -4,7 +4,6 @@
 │   ├── package.json
 │   └── src
 │       ├── app.js
-│       ├── bot.js
 │       ├── config
 │       │   ├── database.js
 │       │   └── swagger.js
@@ -33,6 +32,7 @@
 │   │   ├── components
 │   │   │   ├── buttons
 │   │   │   │   └── Button.jsx
+│   │   │   ├── chat
 │   │   │   ├── layouts
 │   │   │   │   ├── Footer.jsx
 │   │   │   │   └── Header.jsx
@@ -46,6 +46,8 @@
 │   │   ├── pages
 │   │   │   ├── about
 │   │   │   │   └── About.jsx
+│   │   │   ├── bot
+│   │   │   │   └── BotQrPage.jsx
 │   │   │   ├── dashboard
 │   │   │   │   └── DashBoard.jsx
 │   │   │   ├── login
@@ -65,8 +67,6 @@
 │   │       └── tailwind.css
 │   ├── tailwind.config.js
 │   └── vite.config.js
-├── package-lock.json
-├── README.md
 └── structure.txt
 
-28 directories, 42 files
+30 directories, 40 files

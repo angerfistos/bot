@@ -1,34 +1,20 @@
 import { useEffect, useState } from "react";
 import { fetchData } from "../../services/ApiRequest";
-import { getToken } from "../../services/auth";
 import QRCodeComponent from "../../components/qrcode/qrCode";
-import ChatWindow from "../../components/chat/ChatWindow";
+import ConversationsList from "../../components/chat/conversationList";
+import ChatWindow from "../../components/chat/chatWindow";
 
 function Dashboard() {
-  const [user, setUser] = useState(null);
-  const [error, setError] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const token = getToken();
-      if (!token) {
-        setError("Utilisateur non authentifié");
-        return;
-      }
-      const data = await fetchData("users/me", token);
-      if (!data) setError("Erreur lors de la récupération des données");
-      else setUser(data);
-    };
-
-    fetchUser();
-  }, []);
+  const [selectedChat, setSelectedChat] = useState(null);
 
   useEffect(() => {
     const checkConnection = async () => {
-      const response = await fetchData("messaging-status");
-      if (response) {
-        setIsConnected(response.status.includes("connecté"));
+      const response = await fetchData("messaging/status");
+      if (response && response.status.includes("connectée")) {
+        setIsConnected(true);
+      } else {
+        setIsConnected(false);
       }
     };
 
@@ -38,16 +24,23 @@ function Dashboard() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full p-4">
-      <h1 className="mb-4 text-2xl font-bold">
-        {user ? `Bonjour, ${user.firstName} ! 👋` : "Bonjour ! 👋"}
-      </h1>
-      {error && <p className="text-red-500">{error}</p>}
-
-      {isConnected ? (
-        <ChatWindow />
+    <div className="flex h-screen">
+      {/* ✅ Si WhatsApp Web N'EST PAS connecté, on affiche le QR Code */}
+      {!isConnected ? (
+        <div className="flex items-center justify-center w-full">
+          <QRCodeComponent apiEndpoint="http://localhost:3000/api/messaging/status" />
+        </div>
       ) : (
-        <QRCodeComponent apiEndpoint="http://localhost:3000/api/messaging-status" />
+        <>
+          <ConversationsList onSelectChat={setSelectedChat} />
+          {selectedChat ? (
+            <ChatWindow chatId={selectedChat} onBack={() => setSelectedChat(null)} />
+          ) : (
+            <div className="flex items-center justify-center flex-1">
+              <p className="text-gray-500">Sélectionne une conversation</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

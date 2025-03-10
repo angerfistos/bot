@@ -1,3 +1,2 @@
-2025/03/07-21:19:24.682 8403 Reusing MANIFEST /Users/jeremieseynhaeve/Desktop/Bot-main/back/.wwebjs_auth/session-messaging/Default/Local Storage/leveldb/MANIFEST-000001
-2025/03/07-21:19:24.682 8403 Recovering log #3
-2025/03/07-21:19:24.682 8403 Reusing old log /Users/jeremieseynhaeve/Desktop/Bot-main/back/.wwebjs_auth/session-messaging/Default/Local Storage/leveldb/000003.log 
+2025/03/10-07:25:21.464 8a03 Creating DB /Users/jeremieseynhaeve/Developer/bot-ALL/bot/back/.wwebjs_auth/session-messaging/Default/Local Storage/leveldb since it was missing.
+2025/03/10-07:25:21.484 8a03 Reusing MANIFEST /Users/jeremieseynhaeve/Developer/bot-ALL/bot/back/.wwebjs_auth/session-messaging/Default/Local Storage/leveldb/MANIFEST-000001
