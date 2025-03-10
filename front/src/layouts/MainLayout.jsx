@@ -23,8 +23,8 @@ const MainLayout = ({ children }) => {
         <>
           <div className="flex gap-4 p-4 bg-gray-200">
             <nav className="flex flex-grow gap-4 p-4 bg-gray-200">
-              <Link to="/dashboard" className="text-blue-500">Accueil</Link>
-              <Link to="/params" className="text-blue-500">Paramètres</Link>
+              <Link to="/dashboard" className="text-blue-500">Messagerie</Link>
+              <Link to="/params" className="text-blue-500">Répondeur</Link>
               <Link to="/about" className="text-blue-500">À propos</Link>
             </nav>
 

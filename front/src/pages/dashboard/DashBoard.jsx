@@ -24,7 +24,7 @@ function Dashboard() {
   }, []);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex p-4 m-8 bg-white rounded-lg shadow-md">
       {/* ✅ Si WhatsApp Web N'EST PAS connecté, on affiche le QR Code */}
       {!isConnected ? (
         <div className="flex items-center justify-center w-full">
