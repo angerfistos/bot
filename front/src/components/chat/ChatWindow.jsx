@@ -67,12 +67,16 @@ const ChatWindow = ({ chatId, onBack }) => {
       {/* Conteneur des messages avec scroll */}
       <div
         ref={chatContainerRef}
-        className="bg-gray-50 flex-1 h-full p-2 mt-2 overflow-y-auto rounded-lg"
+        className="bg-gray-50 max-h-96 flex-1 p-2 mt-2 overflow-y-auto rounded-lg"
       >
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`p-2 my-1 rounded-lg max-w-xs ${msg.from === "Moi" ? "bg-green-200 ml-auto text-right" : "bg-gray-200"}`}
+            className={`p-2 my-1 rounded-lg max-w-xs ${
+              msg.from === "Moi"
+                ? "bg-green-200 ml-auto text-right"
+                : "bg-gray-200"
+            }`}
           >
             <p>{msg.body}</p>
           </div>
@@ -82,12 +86,14 @@ const ChatWindow = ({ chatId, onBack }) => {
       {/* Barre d'envoi */}
       <div className="flex mt-2">
         <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Écrire un message..."
-          className="flex-1 p-2 border rounded-l"
-        />
+  type="text"
+  value={message}
+  onChange={(e) => setMessage(e.target.value)}
+  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()} // Envoie avec Enter
+  placeholder="Écrire un message..."
+  className="flex-1 p-2 border rounded-l"
+/>
+
         <button
           onClick={handleSendMessage}
           className="p-2 text-white bg-blue-500 rounded-r"

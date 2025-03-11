@@ -38,7 +38,7 @@ const ConversationsList = ({ onSelectChat }) => {
     <div className="w-full max-w-sm p-4 bg-white border-r">
       <h2 className="text-lg font-bold">📩 Conversations</h2>
 
-      {loading && <p className="text-gray-500">Chargement des conversations...</p>}
+      
       {error && <p className="text-red-500">{error}</p>}
 
       {!loading && conversations.length === 0 && !error && (

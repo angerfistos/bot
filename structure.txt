@@ -7,11 +7,13 @@
 │       ├── config
 │       │   ├── database.js
 │       │   └── swagger.js
+│       ├── messaging.js
 │       ├── middleware
 │       │   └── auth.js
 │       ├── models
 │       │   └── user.model.js
 │       └── routes
+│           ├── messaging.routes.js
 │           └── user.routes.js
 ├── front
 │   ├── eslint.config.js
@@ -33,6 +35,8 @@
 │   │   │   ├── buttons
 │   │   │   │   └── Button.jsx
 │   │   │   ├── chat
+│   │   │   │   ├── chatWindow.jsx
+│   │   │   │   └── conversationList.jsx
 │   │   │   ├── layouts
 │   │   │   │   ├── Footer.jsx
 │   │   │   │   └── Header.jsx
@@ -69,4 +73,4 @@
 │   └── vite.config.js
 └── structure.txt
 
-30 directories, 40 files
+30 directories, 44 files
