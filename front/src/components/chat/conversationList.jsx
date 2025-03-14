@@ -11,10 +11,20 @@ const ConversationsList = ({ onSelectChat }) => {
       setLoading(true);
       try {
         const data = await fetchData("messaging/chats");
-        console.log("📩 Données reçues du backend :", data);
+        console.log("📩 Données reçues du backend :", data); // ✅ Vérifie ce que l'API retourne
 
         if (data && Array.isArray(data)) {
-          setConversations(data);
+          setConversations(
+            data.map((chat) => ({
+              id: chat.id,
+              name: chat.name || "Utilisateur inconnu",
+              lastMessage:
+                typeof chat.lastMessage === "string"
+                  ? chat.lastMessage
+                  : "Aucun message",
+              timestamp: chat.timestamp || null,
+            }))
+          );
           setError(null);
         } else {
           console.error("⚠️ Données non valides !");
@@ -38,7 +48,6 @@ const ConversationsList = ({ onSelectChat }) => {
     <div className="w-full max-w-sm p-4 bg-white border-r">
       <h2 className="text-lg font-bold">📩 Conversations</h2>
 
-      
       {error && <p className="text-red-500">{error}</p>}
 
       {!loading && conversations.length === 0 && !error && (
@@ -53,8 +62,8 @@ const ConversationsList = ({ onSelectChat }) => {
             onClick={() => onSelectChat(chat.id)}
           >
             <div>
-              <strong>{chat.name || "Utilisateur inconnu"}</strong>
-              <p className="text-sm text-gray-500">{chat.lastMessage || "Aucun message"}</p>
+              <strong>{chat.name}</strong>
+              <p className="text-sm text-gray-500">{chat.lastMessage}</p>
             </div>
             <span className="text-xs text-gray-400">
               {chat.timestamp ? new Date(chat.timestamp * 1000).toLocaleTimeString() : ""}

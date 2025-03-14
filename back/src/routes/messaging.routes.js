@@ -5,8 +5,9 @@ const {
   sendMessage,
   getMessages,
   getChats,
-  getContact, // ✅ Ajout ici
-} = require("../messaging");
+  getContact,
+} = require("../controllers/messaging.controller"); // ✅ Chemin correct
+
 
 // 📌 Route pour récupérer le statut de connexion WhatsApp
 router.get("/status", getMessagingStatus);

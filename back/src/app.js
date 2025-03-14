@@ -2,8 +2,6 @@ const express = require("express");
 const connectDB = require("./config/database");
 const userRoutes = require("./routes/user.routes");
 const messagingRoutes = require("./routes/messaging.routes"); // ✅ Routes API
-const swaggerUi = require("swagger-ui-express");
-const swaggerSpecs = require("./config/swagger");
 const cors = require("cors");
 const http = require("http");
 
@@ -31,11 +29,6 @@ app.use(express.json());
 connectDB();
 
 /* -------------------------------------------------------------------------- */
-/*                        Documentation Swagger                               */
-/* -------------------------------------------------------------------------- */
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-
-/* -------------------------------------------------------------------------- */
 /*                         Définition des routes                              */
 /* -------------------------------------------------------------------------- */
 app.use("/api/users", userRoutes);
@@ -44,7 +37,7 @@ app.use("/api/messaging", messagingRoutes);
 /* -------------------------------------------------------------------------- */
 /*                         Initialisation WebSocket                           */
 /* -------------------------------------------------------------------------- */
-const { setupWebSocket } = require("./messaging"); // ✅ Import depuis `messaging.js`
+const { setupWebSocket } = require("./controllers/messaging.controller"); // ✅ Correction du chemin
 setupWebSocket(server); // ✅ Initialise WebSocket
 
 /* -------------------------------------------------------------------------- */
@@ -52,5 +45,4 @@ setupWebSocket(server); // ✅ Initialise WebSocket
 /* -------------------------------------------------------------------------- */
 server.listen(PORT, () => {
   console.log(`✅ Serveur démarré sur http://localhost:${PORT}`);
-  console.log(`📜 Documentation Swagger : http://localhost:${PORT}/api-docs`);
 });

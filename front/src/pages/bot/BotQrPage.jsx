@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchData } from "../../services/ApiRequest";
-import QRCodeComponent from "../../components/qrcode/qrCode";
+import QrCode from "../../components/qrcode/QrCode";
 
 const BotQrPage = () => {
   const [botStatus, setBotStatus] = useState("Chargement..."); // 🔄 Suivi du statut du bot

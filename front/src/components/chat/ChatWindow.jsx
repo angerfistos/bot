@@ -5,13 +5,19 @@ const ChatWindow = ({ chatId, onBack }) => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [contactName, setContactName] = useState(chatId);
-  const chatContainerRef = useRef(null); // Référence pour le scroll automatique
+  const chatContainerRef = useRef(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
       const data = await fetchData(`messaging/messages/${chatId}`);
       if (data) {
-        setMessages(data);
+        setMessages(
+          data.map((msg) => ({
+            from: msg.from,
+            body: typeof msg.body === "string" ? msg.body : "[Message non lisible]",
+            timestamp: msg.timestamp || new Date().getTime(),
+          }))
+        );
       }
     };
 
@@ -30,7 +36,6 @@ const ChatWindow = ({ chatId, onBack }) => {
   }, [chatId]);
 
   useEffect(() => {
-    // Scroll automatique vers le bas à chaque mise à jour des messages
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
@@ -58,13 +63,11 @@ const ChatWindow = ({ chatId, onBack }) => {
 
   return (
     <div className="flex flex-col flex-1 h-full p-4">
-      {/* Titre avec bouton retour */}
       <h2 className="flex items-center text-lg font-bold">
         <button onClick={onBack} className="p-2 mr-2 text-blue-500">🔙</button>
         💬 {contactName}
       </h2>
 
-      {/* Conteneur des messages avec scroll */}
       <div
         ref={chatContainerRef}
         className="bg-gray-50 max-h-96 flex-1 p-2 mt-2 overflow-y-auto rounded-lg"
@@ -83,16 +86,15 @@ const ChatWindow = ({ chatId, onBack }) => {
         ))}
       </div>
 
-      {/* Barre d'envoi */}
       <div className="flex mt-2">
         <input
-  type="text"
-  value={message}
-  onChange={(e) => setMessage(e.target.value)}
-  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()} // Envoie avec Enter
-  placeholder="Écrire un message..."
-  className="flex-1 p-2 border rounded-l"
-/>
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+          placeholder="Écrire un message..."
+          className="flex-1 p-2 border rounded-l"
+        />
 
         <button
           onClick={handleSendMessage}
