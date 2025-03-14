@@ -6,6 +6,7 @@ const {
   getMessages,
   getChats,
   getContact,
+  resetSession,
 } = require("../controllers/messaging.controller"); // ✅ Chemin correct
 
 
@@ -23,5 +24,8 @@ router.get("/chats", getChats);
 
 // 📌 Route pour récupérer les infos d'un contact (💡 Nouvelle route)
 router.get("/contact/:chatId", getContact);
+
+// 📌 Route pour réinitialiser la session WhatsApp
+router.post("/reset-session", resetSession);
 
 module.exports = router;

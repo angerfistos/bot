@@ -9,32 +9,54 @@ function Dashboard() {
   const [isConnected, setIsConnected] = useState(false); // État de la connexion à WhatsApp Web
   const [selectedChat, setSelectedChat] = useState(null); // État de la conversation sélectionnée
   const [isModalOpen, setIsModalOpen] = useState(false); // État de la modal
+  const [modalMessage, setModalMessage] = useState(""); // ✅ Stocker le message de la modal
+  const [isResetting, setIsResetting] = useState(false); // ✅ Empêcher la vérification pendant la réinitialisation
 
   useEffect(() => {
+    let interval;
     const checkConnection = async () => {
+      if (isResetting) return; // ✅ Bloquer les appels API si la session est en réinitialisation
+
       const response = await fetchData("messaging/status");
-      setIsConnected(response?.status.includes("connectée") || false);
+      if (response && response.status.includes("connectée")) {
+        setIsConnected(true);
+      } else {
+        setIsConnected(false);
+      }
     };
 
     checkConnection();
-    const interval = setInterval(checkConnection, 5000);
+
+    // ✅ Vérifier seulement si la session est active et pas en reset
+    if (isConnected && !isResetting) {
+      interval = setInterval(checkConnection, 5000);
+    }
+
     return () => clearInterval(interval);
-  }, []);
+  }, [isConnected, isResetting]); // ✅ Ajout de `isResetting` pour éviter l'appel infini
 
   const handleResetSession = async () => {
-    setIsModalOpen(false); // ✅ Fermer la modal après confirmation
+    setIsResetting(true); // ✅ Bloquer les appels API le temps de la réinitialisation
+    setModalMessage("⏳ Réinitialisation en cours..."); // ✅ Affichage immédiat du message
+    setIsModalOpen(true); // ✅ Garde la modal ouverte pour afficher le message
 
     const response = await sendData("messaging/reset-session");
     if (response?.success) {
-      alert("Session réinitialisée. Scannez un nouveau QR Code.");
+      setModalMessage("✅ Session réinitialisée. Scannez un nouveau QR Code."); // ✅ Afficher la confirmation
       setIsConnected(false); // ✅ Forcer l'affichage du QR Code
     } else {
-      alert("Erreur lors de la réinitialisation.");
+      setModalMessage("❌ Erreur lors de la réinitialisation.");
     }
+
+    // ✅ Fermer la modal après 3 secondes et réactiver la vérification
+    setTimeout(() => {
+      setIsModalOpen(false);
+      setIsResetting(false);
+    }, 3000);
   };
 
   return (
-    <div className="flex p-4 m-8 bg-white rounded-lg shadow-md">
+    <div className="flex p-4 bg-white rounded-lg shadow-md">
       {/* ✅ Si WhatsApp Web N'EST PAS connecté, on affiche le QR Code */}
       {!isConnected ? (
         <div className="flex flex-col items-center justify-center w-full">
@@ -74,13 +96,13 @@ function Dashboard() {
         </>
       )}
 
-      {/* ✅ Modal de confirmation */}
+      {/* ✅ Modal de confirmation + affichage du message */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleResetSession}
         title="Confirmer la déconnexion"
-        message="Voulez-vous vraiment vous déconnecter? Cette action réinitialisera votre session."
+        message={modalMessage || "Voulez-vous vraiment vous déconnecter? Cette action réinitialisera votre session."}
       />
     </div>
   );

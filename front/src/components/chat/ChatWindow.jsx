@@ -4,13 +4,18 @@ import { fetchData, sendData } from "../../services/ApiRequest";
 const ChatWindow = ({ chatId, onBack }) => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
-  const [contactName, setContactName] = useState(chatId);
+  const [contactName, setContactName] = useState(chatId || "Chargement...");
   const chatContainerRef = useRef(null);
 
   useEffect(() => {
+    if (!chatId) {
+      console.warn("⚠️ Aucun `chatId` reçu dans ChatWindow.jsx !");
+      return;
+    }
+
     const fetchMessages = async () => {
       const data = await fetchData(`messaging/messages/${chatId}`);
-      if (data) {
+      if (data && Array.isArray(data)) {
         setMessages(
           data.map((msg) => ({
             from: msg.from,
@@ -18,6 +23,8 @@ const ChatWindow = ({ chatId, onBack }) => {
             timestamp: msg.timestamp || new Date().getTime(),
           }))
         );
+      } else {
+        console.warn("⚠️ Données des messages non valides :", data);
       }
     };
 
@@ -43,6 +50,10 @@ const ChatWindow = ({ chatId, onBack }) => {
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
+    if (!chatId) {
+      console.error("❌ Erreur : `chatId` est `undefined` lors de l'envoi du message !");
+      return;
+    }
 
     const response = await sendData("messaging/send-message", {
       to: chatId,
@@ -68,23 +79,19 @@ const ChatWindow = ({ chatId, onBack }) => {
         💬 {contactName}
       </h2>
 
-      <div
-        ref={chatContainerRef}
-        className="bg-gray-50 max-h-96 flex-1 p-2 mt-2 overflow-y-auto rounded-lg"
-      >
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`p-2 my-1 rounded-lg max-w-xs ${
-              msg.from === "Moi"
-                ? "bg-green-200 ml-auto text-right"
-                : "bg-gray-200"
-            }`}
-          >
-            <p>{msg.body}</p>
-          </div>
-        ))}
-      </div>
+      {chatId ? (
+        <div ref={chatContainerRef} className="bg-gray-50 max-h-[50vh] flex-1 p-2 mt-2 overflow-y-auto rounded-lg">
+          {messages.map((msg, index) => (
+            <div key={index} className={`p-2 my-1 rounded-lg max-w-xs ${
+              msg.from === "Moi" ? "bg-green-200 ml-auto text-right" : "bg-gray-200"
+            }`}>
+              <p>{msg.body}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-500">🔍 Sélectionne une conversation</p>
+      )}
 
       <div className="flex mt-2">
         <input
@@ -94,12 +101,10 @@ const ChatWindow = ({ chatId, onBack }) => {
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           placeholder="Écrire un message..."
           className="flex-1 p-2 border rounded-l"
+          disabled={!chatId}
         />
 
-        <button
-          onClick={handleSendMessage}
-          className="p-2 text-white bg-blue-500 rounded-r"
-        >
+        <button onClick={handleSendMessage} className="p-2 text-white bg-blue-500 rounded-r" disabled={!chatId}>
           Envoyer
         </button>
       </div>

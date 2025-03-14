@@ -1,4 +1,6 @@
-const messagingClient = require("../../sessions/messagingSession");
+const fs = require("fs");
+const path = require("path");
+const messagingClient = require("../../sessions/messaging-data/messagingSession.js");
 const qrcode = require("qrcode");
 const mongoose = require("mongoose");
 const { Server } = require("socket.io");
@@ -44,7 +46,7 @@ messagingClient.on("message", async (msg) => {
   const newMessage = await Message.create({
     chatId: msg.from,
     from: msg.from,
-    body: typeof msg.body === "string" ? msg.body : "[Message non lisible]", // ✅ Vérification ici
+    body: typeof msg.body === "string" ? msg.body : "[Message non lisible]",
     timestamp: Date.now(),
   });
 
@@ -68,15 +70,7 @@ const getMessages = async (req, res) => {
   const { chatId } = req.params;
   try {
     const messages = await Message.find({ chatId }).sort({ timestamp: 1 });
-
-    const formattedMessages = messages.map((msg) => ({
-      chatId: msg.chatId,
-      from: msg.from,
-      body: typeof msg.body === "string" ? msg.body : "[Message non lisible]", // ✅ Vérification ici
-      timestamp: msg.timestamp,
-    }));
-
-    res.json(formattedMessages);
+    res.json(messages);
   } catch (error) {
     console.error("❌ Erreur lors de la récupération des messages :", error);
     res.status(500).json({ error: "Erreur serveur", details: error.message });
@@ -100,7 +94,7 @@ const sendMessage = async (req, res) => {
     const newMessage = await Message.create({
       chatId: to,
       from: "Moi",
-      body: typeof message === "string" ? message : "[Message non lisible]", // ✅ Vérification ici
+      body: message,
       timestamp: Date.now(),
     });
 
@@ -115,21 +109,52 @@ const sendMessage = async (req, res) => {
   }
 };
 
-// 📌 Gérer la déconnexion de WhatsApp Web et éviter les conflits
-messagingClient.on("disconnected", async (reason) => {
-  console.log("⚠️ WhatsApp Web s'est déconnecté ! Raison :", reason);
-  messagingStatus = "En attente du QR Code";
-  messagingQrCode = null;
+/* ---------------- 📌 Réinitialiser la session WhatsApp Web ---------------- */
+const resetSession = async (req, res) => {
+  try {
+    console.log("♻️ Réinitialisation de la session WhatsApp en cours...");
 
-  setTimeout(() => {
-    if (!messagingClient?.info?.wid) {
-      console.log("🔄 Redémarrage sécurisé de WhatsApp Web...");
-      messagingClient.initialize();
+    // 📌 Chemin du dossier où WhatsApp Web stocke ses sessions
+    const sessionPath = path.join(
+      __dirname,
+      "../../sessions/messaging-data/session-messaging"
+    );
+
+    // 📌 Vérifier si le dossier contenant la session existe
+    if (fs.existsSync(sessionPath) && fs.readdirSync(sessionPath).length > 0) {
+      console.log("🗑 Suppression des fichiers de session...");
+      fs.rmSync(sessionPath, { recursive: true, force: true });
+      console.log("✅ Données de session WhatsApp supprimées !");
+    } else {
+      console.warn("⚠️ Aucune session WhatsApp trouvée à supprimer.");
     }
-  }, 5000);
-});
 
-// 📌 Récupérer la liste des conversations WhatsApp
+    // 📌 Mise à jour immédiate du statut pour afficher le QR Code rapidement
+    messagingStatus = "En attente du QR Code";
+    messagingQrCode = null;
+
+    // 📌 Vérification avant redémarrage
+    if (messagingClient) {
+      console.log("🚀 Redémarrage immédiat de WhatsApp Web...");
+      messagingClient.destroy(); // ✅ Arrête immédiatement l'instance actuelle
+      setTimeout(() => {
+        messagingClient.initialize();
+      }, 1000); // 🔄 Relance WhatsApp Web après 1 seconde
+    } else {
+      console.error("❌ Erreur : `messagingClient` n'est pas initialisé.");
+    }
+
+    res.json({
+      success: true,
+      message: "Session WhatsApp réinitialisée avec succès !",
+    });
+  } catch (error) {
+    console.error("❌ Erreur lors de la réinitialisation :", error);
+    res.status(500).json({ error: "Erreur serveur", details: error.message });
+  }
+};
+
+/* ------------ 📌 Récupérer la liste des conversations WhatsApp ------------ */
 const getChats = async (req, res) => {
   try {
     if (!messagingClient?.info?.wid) {
@@ -137,32 +162,16 @@ const getChats = async (req, res) => {
     }
 
     console.log("✅ Récupération des conversations...");
-
     const chats = await messagingClient.getChats();
 
-    const formattedChats = chats.map((chat) => ({
-      id: chat.id._serialized,
-      name: chat.name || "Utilisateur inconnu",
-      lastMessage:
-        typeof chat.lastMessage?.body === "string"
-          ? chat.lastMessage.body
-          : "Aucun message",
-      timestamp: chat.lastMessage?.timestamp || null,
-    }));
-
-    res.json(formattedChats);
+    res.json(chats);
   } catch (error) {
     console.error("❌ Erreur récupération des chats :", error);
-    res
-      .status(500)
-      .json({
-        error: "Erreur récupération des conversations",
-        details: error.message,
-      });
+    res.status(500).json({ error: "Erreur récupération des conversations" });
   }
 };
 
-// 📌 Récupérer les infos d'un contact
+/* ------------------- 📌 Récupérer les infos d'un contact ------------------ */
 const getContact = async (req, res) => {
   const { chatId } = req.params;
 
@@ -206,4 +215,5 @@ module.exports = {
   getChats,
   getContact,
   setupWebSocket,
+  resetSession,
 };

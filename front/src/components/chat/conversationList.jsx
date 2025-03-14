@@ -11,23 +11,53 @@ const ConversationsList = ({ onSelectChat }) => {
       setLoading(true);
       try {
         const data = await fetchData("messaging/chats");
-        console.log("📩 Données reçues du backend :", data); // ✅ Vérifie ce que l'API retourne
+        //console.log("📩 Données reçues du backend :", JSON.stringify(data, null, 2));
 
         if (data && Array.isArray(data)) {
-          setConversations(
-            data.map((chat) => ({
-              id: chat.id,
-              name: chat.name || "Utilisateur inconnu",
-              lastMessage:
-                typeof chat.lastMessage === "string"
-                  ? chat.lastMessage
-                  : "Aucun message",
-              timestamp: chat.timestamp || null,
-            }))
+          const updatedConversations = await Promise.all(
+            data.map(async (chat) => {
+              const chatId = typeof chat.id === "object" ? chat.id._serialized : chat.id;
+              let chatName = chat.name;
+
+              // ✅ Vérifier si un dernier message existe
+              let lastMessage = "Aucun message";
+              if (chat.lastMessage) {
+                lastMessage =
+                  typeof chat.lastMessage === "string"
+                    ? chat.lastMessage
+                    : chat.lastMessage.body || "Message non lisible";
+              }
+
+              // ✅ Vérifier si un timestamp existe
+              let timestamp = null;
+              if (chat.timestamp) {
+                timestamp = new Date(chat.timestamp * 1000).toLocaleTimeString();
+              }
+
+              // ✅ Récupération du nom du contact si absent
+              if (!chat.name || chat.name === chatId) {
+                try {
+                  const contactData = await fetchData(`messaging/contact/${chatId}`);
+                  chatName = contactData?.name || chatId; // ✅ Si pas de nom, on garde l'ID
+                } catch (error) {
+                  console.error(`❌ Erreur récupération du contact ${chatId} :`, error);
+                  chatName = chatId; // ✅ Si erreur, on affiche le numéro
+                }
+              }
+
+              return {
+                id: chatId,
+                name: chatName,
+                lastMessage,
+                timestamp,
+              };
+            })
           );
+
+          setConversations(updatedConversations);
           setError(null);
         } else {
-          console.error("⚠️ Données non valides !");
+          console.error("⚠️ Données non valides :", data);
           setError("Format des données incorrect.");
           setConversations([]);
         }
@@ -40,14 +70,15 @@ const ConversationsList = ({ onSelectChat }) => {
     };
 
     fetchConversations();
-    const interval = setInterval(fetchConversations, 5000); // 🔄 Rafraîchit toutes les 5 sec
+    const interval = setInterval(fetchConversations, 5000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="w-full max-w-sm p-4 bg-white border-r">
+    <div className="w-full max-w-sm p-4 bg-white border-r h-[600px] overflow-y-auto">
       <h2 className="text-lg font-bold">📩 Conversations</h2>
 
+      {loading && <p className="text-gray-500">Chargement...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {!loading && conversations.length === 0 && !error && (
@@ -56,18 +87,13 @@ const ConversationsList = ({ onSelectChat }) => {
 
       <ul>
         {conversations.map((chat) => (
-          <li
-            key={chat.id}
-            className="hover:bg-gray-100 flex items-center justify-between p-3 border-b cursor-pointer"
-            onClick={() => onSelectChat(chat.id)}
-          >
+          <li key={chat.id} className="hover:bg-gray-100 flex items-center justify-between p-3 border-b cursor-pointer"
+              onClick={() => chat.id && onSelectChat(chat.id)}>
             <div>
-              <strong>{chat.name}</strong>
+              <strong>{chat.name}</strong> {/* ✅ Affiche bien le nom du contact */}
               <p className="text-sm text-gray-500">{chat.lastMessage}</p>
             </div>
-            <span className="text-xs text-gray-400">
-              {chat.timestamp ? new Date(chat.timestamp * 1000).toLocaleTimeString() : ""}
-            </span>
+            <span className="text-xs text-gray-400">{chat.timestamp || ""}</span>
           </li>
         ))}
       </ul>

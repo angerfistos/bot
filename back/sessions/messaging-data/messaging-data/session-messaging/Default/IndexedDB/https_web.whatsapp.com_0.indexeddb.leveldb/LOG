@@ -1,0 +1,18 @@
+2025/03/14-12:12:00.767 a103 Reusing MANIFEST /Users/jeremieseynhaeve/Developer/bot-ALL/bot/back/sessions/messaging-data/messaging-data/session-messaging/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/03/14-12:12:00.767 a103 Recovering log #67
+2025/03/14-12:12:00.782 a103 Reusing old log /Users/jeremieseynhaeve/Developer/bot-ALL/bot/back/sessions/messaging-data/messaging-data/session-messaging/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000067.log 
+2025/03/14-12:12:00.783 a103 Delete type=2 #64
+2025/03/14-12:12:00.783 a103 Delete type=2 #65
+2025/03/14-12:12:00.783 a103 Delete type=2 #68
+2025/03/14-12:12:02.260 b403 Level-0 table #73: started
+2025/03/14-12:12:02.270 b403 Level-0 table #73: 256218 bytes OK
+2025/03/14-12:12:02.282 b403 Delete type=0 #67
+2025/03/14-12:12:02.283 b403 Manual compaction at level-0 from '\x00\x1c\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x1d\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/03/14-12:12:03.226 b403 Compacting 1@1 + 2@2 files
+2025/03/14-12:12:03.292 b403 Generated table #74@1: 43228 keys, 2202803 bytes
+2025/03/14-12:12:03.312 b403 Generated table #75@1: 11395 keys, 556844 bytes
+2025/03/14-12:12:03.312 b403 Compacted 1@1 + 2@2 files => 2759647 bytes
+2025/03/14-12:12:03.321 b403 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/03/14-12:12:03.321 b403 Delete type=2 #70
+2025/03/14-12:12:03.321 b403 Delete type=2 #73
+2025/03/14-12:12:03.321 b403 Delete type=2 #69
